@@ -3,7 +3,7 @@ const http=require("http"),fs=require("fs"),path=require("path");
 const {WebSocketServer}=require("ws");
 const PORT=process.env.PORT||3000;
 const sessions=new Map(),SYMBOLS=["◆","✦","⬡","◈","✧"];
-const ANSWERS=[0,1,2,0,0,1,0,2,1,1,0,0,1,0];
+const ANSWERS=[1,0,0,0,1];
 
 const MIME={".html":"text/html; charset=utf-8",".css":"text/css; charset=utf-8",".js":"application/javascript; charset=utf-8",".mp3":"audio/mpeg"};
 const server=http.createServer((req,res)=>{

@@ -26,3 +26,9 @@ npm start
 - Runtime: Node
 - Build Command: `npm install`
 - Start Command: `npm start`
+
+
+## توزيع الأسئلة
+- سؤال واحد تفكير عليا.
+- سؤالان نصيان.
+- سؤالان كسور.
