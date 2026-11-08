@@ -19,7 +19,7 @@ function makeCode(){let c;do c=String(Math.floor(Math.random()*1e6)).padStart(6,
 function send(ws,type,data={}){if(ws?.readyState===1)ws.send(JSON.stringify({type,...data}))}
 function pub(t){return{id:t.id,name:t.name,symbol:t.symbol,score:t.score,totalTime:t.totalTime,correct:t.correct}}
 function broadcast(s){
- const st={id:s.id,code:s.code,status:s.status,q:s.q,started:s.started,teams:[...s.teams.values()].map(pub)};
+ const st={id:s.id,code:s.code,status:s.status,q:s.q,started:s.started,maxTeams:s.maxTeams||5,teams:[...s.teams.values()].map(pub)};
  send(s.host,"state",{state:st,answered:[...s.answered],correctIndex:s.status!=="question_active"?ANSWERS[s.q]:undefined,correctLabel:s.status!=="question_active"?String.fromCharCode(65+ANSWERS[s.q]):undefined});
  for(const t of s.teams.values()){
   const a=t.answers.find(x=>x.q===s.q);
@@ -34,14 +34,15 @@ wss.on("connection",ws=>{
  ws.on("message",raw=>{
   let m;try{m=JSON.parse(raw)}catch{return}
   if(m.type==="create"){
-   const s={id:id(),code:makeCode(),hostToken:id(),host:ws,status:"waiting",q:0,started:null,teams:new Map(),answered:new Set()};
+   const maxTeams=Math.max(2,Math.min(5,Number(m.maxTeams)||5));
+   const s={id:id(),code:makeCode(),hostToken:id(),host:ws,status:"waiting",q:0,started:null,maxTeams,teams:new Map(),answered:new Set()};
    sessions.set(s.id,s);send(ws,"created",{id:s.id,code:s.code,hostToken:s.hostToken});broadcast(s);return;
   }
   if(m.type==="host_reconnect"){const s=sessions.get(m.id);if(s&&s.hostToken===m.hostToken){s.host=ws;broadcast(s)}return}
   if(m.type==="check_code"){const s=[...sessions.values()].find(x=>x.code===String(m.code)&&x.status==="waiting");return send(ws,"code_result",{ok:!!s,id:s?.id})}
   if(m.type==="join"){
    const s=sessions.get(m.id);if(!s||s.status!=="waiting")return send(ws,"error",{message:"الجلسة غير متاحة"});
-   if(s.teams.size>=5)return send(ws,"error",{message:"اكتمل عدد المجموعات"});
+   if(s.teams.size>=(s.maxTeams||5))return send(ws,"error",{message:"اكتمل عدد المجموعات"});
    const name=String(m.name||"").trim();if(!name)return send(ws,"error",{message:"اكتبي اسم المجموعة"});
    if([...s.teams.values()].some(t=>t.name.toLowerCase()===name.toLowerCase()))return send(ws,"error",{message:"اسم المجموعة مستخدم بالفعل"});
    const t={id:id(),token:id(),name,symbol:SYMBOLS[s.teams.size],score:0,totalTime:0,correct:0,answers:[],ws};s.teams.set(t.id,t);
