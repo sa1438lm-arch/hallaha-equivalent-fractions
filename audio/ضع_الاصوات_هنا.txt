@@ -1,0 +1,6 @@
+انسخي إلى هذا المجلد:
+lobby.mp3
+start.mp3
+winner.mp3
+من مجلدك:
+C:\Users\HUAWEI\OneDrive\Desktop\game\hallha-v5-ready\audio
