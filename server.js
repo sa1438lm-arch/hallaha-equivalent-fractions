@@ -3,7 +3,7 @@ const http=require("http"),fs=require("fs"),path=require("path");
 const {WebSocketServer}=require("ws");
 const PORT=process.env.PORT||3000;
 const sessions=new Map(),SYMBOLS=["◆","✦","⬡","◈","✧"];
-const ANSWERS=[1,0,0,0,1];
+const ANSWERS=[0,0,0,0,2];
 
 const MIME={".html":"text/html; charset=utf-8",".css":"text/css; charset=utf-8",".js":"application/javascript; charset=utf-8",".mp3":"audio/mpeg"};
 const server=http.createServer((req,res)=>{
@@ -53,8 +53,8 @@ wss.on("connection",ws=>{
    const s=sessions.get(m.id);if(!s||s.hostToken!==m.hostToken)return;
    if(m.action==="start"&&s.status==="waiting"&&s.teams.size>=2)startQ(s,0);
    else if(m.action==="leaderboard"&&s.status==="question_reveal"){s.status="leaderboard";broadcast(s)}
-   else if(m.action==="next"&&s.status==="leaderboard"&&s.q<13)startQ(s,s.q+1);
-   else if(m.action==="finish"&&s.status==="leaderboard"&&s.q===13){s.status="finished";broadcast(s)}
+   else if(m.action==="next"&&s.status==="leaderboard"&&s.q<ANSWERS.length-1)startQ(s,s.q+1);
+   else if(m.action==="finish"&&s.status==="leaderboard"&&s.q===ANSWERS.length-1){s.status="finished";broadcast(s)}
    return;
   }
   if(m.type==="answer"){
